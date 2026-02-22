@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Image Classification API Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .tab-container {
+            margin-bottom: 30px;
+        }
+        .tab-buttons {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="url"], input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input[type="url"]:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        .button:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+        .button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .button.secondary {
+            background-color: #95a5a6;
+        }
+        .button.secondary:hover:not(:disabled) {
+            background-color: #7f8c8d;
+        }
+        .error {
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .success {
+            background-color: #27ae60;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .result {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        .preview {
+            margin: 15px 0;
+            text-align: center;
+        }
+        .preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        .loading {
+            text-align: center;
+            color: #3498db;
+            font-style: italic;
+        }
+        .result-item {
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .category-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .category-garbage { background-color: #e67e22; color: white; }
+        .category-potholes { background-color: #8e44ad; color: white; }
+        .category-deforestation { background-color: #c0392b; color: white; }
+        .category-reject { background-color: #95a5a6; color: white; }
+        .severity-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .severity-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        .severity-low { background-color: #27ae60; }
+        .severity-moderate { background-color: #f39c12; }
+        .severity-high { background-color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Environmental Image Classification API Demo</h1>
+        
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="switchTab('url')">📷 From URL</button>
+                <button class="tab-button" onclick="switchTab('upload')">📁 Upload File</button>
+                <button class="tab-button" onclick="switchTab('info')">ℹ️ API Info</button>
+            </div>
+
+            <!-- URL Tab -->
+            <div id="url-tab" class="tab-content active">
+                <div class="form-group">
+                    <label for="image-url">Image URL:</label>
+                    <input type="url" id="image-url" placeholder="https://example.com/image.jpg">
+                </div>
+                <button class="button" onclick="classifyFromURL()" id="url-button">Classify Image</button>
+                <button class="button secondary" onclick="clearURLForm()">Clear</button>
+                <div id="url-result"></div>
+            </div>
+
+            <!-- Upload Tab -->
+            <div id="upload-tab" class="tab-content">
+                <div class="form-group">
+                    <label for="image-file">Select Image File:</label>
+                    <input type="file" id="image-file" accept="image/*" onchange="previewFile()">
+                </div>
+                <div id="preview-container"></div>
+                <button class="button" onclick="classifyFromUpload()" id="upload-button">Classify Image</button>
+                <button class="button secondary" onclick="clearUploadForm()">Clear</button>
+                <div id="upload-result"></div>
+            </div>
+
+            <!-- Info Tab -->
+            <div id="info-tab" class="tab-content">
+                <h3>API Endpoints</h3>
+                <ul>
+                    <li><strong>POST /classify</strong> - Classify image from URL</li>
+                    <li><strong>POST /classify-upload</strong> - Classify uploaded image</li>
+                    <li><strong>GET /health</strong> - Check API status</li>
+                    <li><strong>GET /</strong> - API information</li>
+                </ul>
+                
+                <h3>Categories</h3>
+                <ul>
+                    <li><span class="category-badge category-garbage">Garbage</span> - Litter, waste, pollution</li>
+                    <li><span class="category-badge category-potholes">Potholes</span> - Road damage, infrastructure issues</li>
+                    <li><span class="category-badge category-deforestation">Deforestation</span> - Tree cutting, forest clearing</li>
+                    <li><span class="category-badge category-reject">Reject</span> - Images that don't fit any category</li>
+                </ul>
+
+                <h3>Response Fields</h3>
+                <ul>
+                    <li><strong>category</strong> - Classification result</li>
+                    <li><strong>severity</strong> - Score from 0-100 (null for rejected images)</li>
+                    <li><strong>severity_level</strong> - Human-readable severity level</li>
+                    <li><strong>scale</strong> - Description of issue size/extent</li>
+                </ul>
+
+                <button class="button" onclick="checkHealth()">Check API Health</button>
+                <div id="health-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showError(containerId, message) {
+            document.getElementById(containerId).innerHTML = `<div class="error">❌ ${message}</div>`;
+        }
+
+        function showLoading(containerId) {
+            document.getElementById(containerId).innerHTML = '<div class="loading">🔄 Analyzing image...</div>';
+        }
+
+        function showResult(containerId, result) {
+            const severityClass = result.severity > 60 ? 'severity-high' : result.severity > 30 ? 'severity-moderate' : 'severity-low';
+            
+            let html = '<div class="result">';
+            html += '<h3>🎯 Classification Result</h3>';
+            
+            html += '<div class="result-item">';
+            html += '<span class="result-label">Category:</span> ';
+            html += `<span class="category-badge category-${result.category}">${result.category}</span>`;
+            html += '</div>';
+            
+            if (result.severity !== null) {
+                html += '<div class="result-item">';
+                html += '<span class="result-label">Severity:</span> ';
+                html += `${result.severity}/100`;
+                html += '<div class="severity-bar">';
+                html += `<div class="severity-fill ${severityClass}" style="width: ${result.severity}%"></div>`;
+                html += '</div>';
+                html += '</div>';
+                
+                html += '<div class="result-item">';
+                html += '<span class="result-label">Severity Level:</span> ';
+                html += `${result.severity_level}`;
+                html += '</div>';
+                
+                html += '<div class="result-item">';
+                html += '<span class="result-label">Scale:</span> ';
+                html += `${result.scale}`;
+                html += '</div>';
+            } else {
+                html += '<div class="result-item">';
+                html += '<span class="result-label">Status:</span> Image rejected - does not fit environmental categories';
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            document.getElementById(containerId).innerHTML = html;
+        }
+
+        async function classifyFromURL() {
+            const urlInput = document.getElementById('image-url');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('url-result', 'Please enter an image URL');
+                return;
+            }
+
+            const button = document.getElementById('url-button');
+            button.disabled = true;
+            showLoading('url-result');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/classify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ image_url: url })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Classification failed');
+                }
+
+                const result = await response.json();
+                showResult('url-result', result);
+            } catch (error) {
+                showError('url-result', error.message);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function classifyFromUpload() {
+            const fileInput = document.getElementById('image-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showError('upload-result', 'Please select an image file');
+                return;
+            }
+
+            const button = document.getElementById('upload-button');
+            button.disabled = true;
+            showLoading('upload-result');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/classify-upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Classification failed');
+                }
+
+                const result = await response.json();
+                showResult('upload-result', result);
+            } catch (error) {
+                showError('upload-result', error.message);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function previewFile() {
+            const fileInput = document.getElementById('image-file');
+            const previewContainer = document.getElementById('preview-container');
+            const file = fileInput.files[0];
+
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewContainer.innerHTML = `
+                        <div class="preview">
+                            <h4>📸 Preview:</h4>
+                            <img src="${e.target.result}" alt="Preview">
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.innerHTML = '';
+            }
+        }
+
+        function clearURLForm() {
+            document.getElementById('image-url').value = '';
+            document.getElementById('url-result').innerHTML = '';
+        }
+
+        function clearUploadForm() {
+            document.getElementById('image-file').value = '';
+            document.getElementById('preview-container').innerHTML = '';
+            document.getElementById('upload-result').innerHTML = '';
+        }
+
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                
+                let html = '<div class="result">';
+                html += '<h3>🏥 API Health Status</h3>';
+                html += `<div class="result-item"><span class="result-label">Status:</span> ${data.status}</div>`;
+                html += `<div class="result-item"><span class="result-label">API Key Configured:</span> ${data.api_key_configured ? '✅ Yes' : '❌ No'}</div>`;
+                html += '</div>';
+                
+                document.getElementById('health-result').innerHTML = html;
+            } catch (error) {
+                showError('health-result', 'Failed to connect to API. Make sure the server is running on port 8000.');
+            }
+        }
+
+        // Allow Enter key to submit forms
+        document.getElementById('image-url').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                classifyFromURL();
+            }
+        });
+    </script>
+</body>
+</html>

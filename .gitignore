@@ -1,0 +1,144 @@
+# ==============================================================================
+# Python
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Typing
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# ==============================================================================
+# Environment & Secrets  ← MOST IMPORTANT: never commit credentials
+# ==============================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ==============================================================================
+# Virtual environments
+# ==============================================================================
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.conda/
+conda-env/
+
+# ==============================================================================
+# Jupyter Notebooks
+# ==============================================================================
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+# Optionally ignore notebook output (uncomment if preferred):
+# *.ipynb
+
+# ==============================================================================
+# IDEs & editors
+# ==============================================================================
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# PyCharm / JetBrains
+.idea/
+*.iml
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim / Emacs
+*.swp
+*.swo
+*~
+\#*\#
+
+# ==============================================================================
+# OS-generated files
+# ==============================================================================
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+
+# ==============================================================================
+# Logs & temporary files
+# ==============================================================================
+*.log
+*.tmp
+*.bak
+*.orig
+
+# ==============================================================================
+# Project-specific
+# ==============================================================================
+# Uploaded images during local testing
+uploads/
+test_images/
